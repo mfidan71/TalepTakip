@@ -13,6 +13,10 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        display: ['Space Grotesk', 'system-ui', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -56,6 +60,21 @@ export default {
           "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
+        },
+        stage: {
+          talep: "hsl(var(--stage-talep))",
+          degerlendirme: "hsl(var(--stage-degerlendirme))",
+          planlama: "hsl(var(--stage-planlama))",
+          gelistirme: "hsl(var(--stage-gelistirme))",
+          test: "hsl(var(--stage-test))",
+          canli: "hsl(var(--stage-canli))",
+        },
+        priority: {
+          1: "hsl(var(--priority-1))",
+          2: "hsl(var(--priority-2))",
+          3: "hsl(var(--priority-3))",
+          4: "hsl(var(--priority-4))",
+          5: "hsl(var(--priority-5))",
         },
       },
       borderRadius: {
