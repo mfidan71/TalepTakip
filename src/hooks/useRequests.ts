@@ -54,10 +54,21 @@ export const useUpdateRequest = () => {
       const { error } = await supabase.from("requests").update(updates).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onMutate: async ({ id, ...updates }) => {
+      await qc.cancelQueries({ queryKey: ["requests"] });
+      const previous = qc.getQueryData<Request[]>(["requests"]);
+      qc.setQueryData<Request[]>(["requests"], (old) =>
+        old?.map((r) => (r.id === id ? { ...r, ...updates } : r))
+      );
+      return { previous };
+    },
+    onError: (e: Error, _vars, context) => {
+      if (context?.previous) qc.setQueryData(["requests"], context.previous);
+      toast.error(e.message);
+    },
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ["requests"] });
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 };
 
