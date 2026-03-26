@@ -1,4 +1,5 @@
 import { CreateRequestDialog } from "@/components/CreateRequestDialog";
+import { StageManagerDialog } from "@/components/StageManagerDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { ClipboardList, LogOut } from "lucide-react";
@@ -19,6 +20,7 @@ export const AppHeader = () => {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <StageManagerDialog />
           <CreateRequestDialog />
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span className="hidden sm:inline">{user?.email}</span>
