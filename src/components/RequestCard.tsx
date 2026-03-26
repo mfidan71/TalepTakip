@@ -2,24 +2,26 @@ import { Request, useUpdateRequest, useDeleteRequest, useProfiles } from "@/hook
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { STAGES, getStageLabel } from "@/lib/stages";
-import { ChevronRight, ChevronLeft, Trash2, User } from "lucide-react";
+import { STAGES } from "@/lib/stages";
+import {
+  ChevronRight,
+  ChevronLeft,
+  Trash2,
+  User,
+  ArrowDown,
+  ArrowDownRight,
+  Minus,
+  ArrowUpRight,
+  Flame,
+} from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
-const priorityLabels: Record<number, string> = {
-  1: "Çok Düşük",
-  2: "Düşük",
-  3: "Orta",
-  4: "Yüksek",
-  5: "Kritik",
-};
-
-const priorityColors: Record<number, string> = {
-  1: "bg-priority-1",
-  2: "bg-priority-2",
-  3: "bg-priority-3",
-  4: "bg-priority-4",
-  5: "bg-priority-5",
+const priorityConfig: Record<number, { label: string; icon: React.ElementType; className: string }> = {
+  1: { label: "Çok Düşük", icon: ArrowDown, className: "text-priority-1" },
+  2: { label: "Düşük", icon: ArrowDownRight, className: "text-priority-2" },
+  3: { label: "Orta", icon: Minus, className: "text-priority-3" },
+  4: { label: "Yüksek", icon: ArrowUpRight, className: "text-priority-4" },
+  5: { label: "Kritik", icon: Flame, className: "text-priority-5" },
 };
 
 export const RequestCard = ({ request }: { request: Request }) => {
@@ -34,6 +36,8 @@ export const RequestCard = ({ request }: { request: Request }) => {
   const isCreator = user?.id === request.created_by;
 
   const creatorProfile = profiles?.find((p) => p.user_id === request.created_by);
+  const prio = priorityConfig[request.priority] ?? priorityConfig[3];
+  const PrioIcon = prio.icon;
 
   const moveStage = (dir: 1 | -1) => {
     const newStage = STAGES[stageIndex + dir]?.key;
@@ -47,9 +51,9 @@ export const RequestCard = ({ request }: { request: Request }) => {
       <CardContent className="p-4 space-y-3">
         <div className="flex items-start justify-between gap-2">
           <h3 className="font-semibold text-sm text-foreground leading-tight">{request.title}</h3>
-          <span className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-primary-foreground ${priorityColors[request.priority]}`}>
-            {request.priority}
-          </span>
+          <div className={`shrink-0 flex items-center gap-1 ${prio.className}`} title={prio.label}>
+            <PrioIcon className="h-4 w-4" strokeWidth={2.5} />
+          </div>
         </div>
 
         {request.description && (
@@ -62,8 +66,9 @@ export const RequestCard = ({ request }: { request: Request }) => {
               {request.category}
             </Badge>
           )}
-          <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-            {priorityLabels[request.priority]}
+          <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${prio.className}`}>
+            <PrioIcon className="h-3 w-3 mr-0.5" />
+            {prio.label}
           </Badge>
         </div>
 
