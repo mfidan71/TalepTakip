@@ -30,6 +30,7 @@ const priorityConfig: Record<number, { label: string; icon: React.ElementType; c
 
 export const RequestCard = ({ request }: { request: Request }) => {
   const [editOpen, setEditOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
   const updateReq = useUpdateRequest();
   const deleteReq = useDeleteRequest();
   const { user } = useAuth();
