@@ -19,6 +19,7 @@ import {
   Flame,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { getCategoryConfig } from "@/lib/categories";
 
 const priorityConfig: Record<number, { label: string; icon: React.ElementType; className: string }> = {
   1: { label: "Çok Düşük", icon: ArrowDown, className: "text-priority-1" },

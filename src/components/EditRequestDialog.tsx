@@ -67,9 +67,18 @@ export const EditRequestDialog = ({ request, open, onOpenChange }: Props) => {
                 <SelectValue placeholder="Kategori seçin" />
               </SelectTrigger>
               <SelectContent>
-                {CATEGORIES.map((c) => (
-                  <SelectItem key={c} value={c}>{c}</SelectItem>
-                ))}
+                {CATEGORIES.map((c) => {
+                  const conf = getCategoryConfig(c);
+                  const Icon = conf.icon;
+                  return (
+                    <SelectItem key={c} value={c}>
+                      <span className={`inline-flex items-center gap-1.5 ${conf.className}`}>
+                        <Icon className="h-3.5 w-3.5" />
+                        {c}
+                      </span>
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>

@@ -11,9 +11,9 @@ import {
   Minus,
   ArrowUpRight,
   Flame,
-  Tag,
   Layers,
 } from "lucide-react";
+import { getCategoryConfig } from "@/lib/categories";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 
