@@ -55,3 +55,36 @@ export const useDeleteStage = () => {
     onError: (e: Error) => toast.error(e.message),
   });
 };
+
+export const useReorderStages = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (orderedIds: { id: string; sort_order: number }[]) => {
+      const promises = orderedIds.map(({ id, sort_order }) =>
+        supabase.from("stages").update({ sort_order }).eq("id", id)
+      );
+      const results = await Promise.all(promises);
+      const err = results.find((r) => r.error);
+      if (err?.error) throw err.error;
+    },
+    onMutate: async (orderedIds) => {
+      await qc.cancelQueries({ queryKey: ["stages"] });
+      const previous = qc.getQueryData<Stage[]>(["stages"]);
+      if (previous) {
+        const orderMap = new Map(orderedIds.map((o) => [o.id, o.sort_order]));
+        const updated = previous
+          .map((s) => ({ ...s, sort_order: orderMap.get(s.id) ?? s.sort_order }))
+          .sort((a, b) => a.sort_order - b.sort_order);
+        qc.setQueryData(["stages"], updated);
+      }
+      return { previous };
+    },
+    onError: (e: Error, _vars, context) => {
+      if (context?.previous) qc.setQueryData(["stages"], context.previous);
+      toast.error(e.message);
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ["stages"] });
+    },
+  });
+};
