@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useRequests, useUpdateRequest } from "@/hooks/useRequests";
-import { useStages, useCreateStage, useDeleteStage } from "@/hooks/useStages";
+import { useStages, useCreateStage, useDeleteStage, useReorderStages } from "@/hooks/useStages";
 import { RequestCard } from "@/components/RequestCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
