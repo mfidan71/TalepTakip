@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EditRequestDialog } from "@/components/EditRequestDialog";
+import { RequestDetailDialog } from "@/components/RequestDetailDialog";
 import {
   ChevronRight,
   ChevronLeft,
@@ -29,6 +30,7 @@ const priorityConfig: Record<number, { label: string; icon: React.ElementType; c
 
 export const RequestCard = ({ request }: { request: Request }) => {
   const [editOpen, setEditOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
   const updateReq = useUpdateRequest();
   const deleteReq = useDeleteRequest();
   const { user } = useAuth();
@@ -53,7 +55,10 @@ export const RequestCard = ({ request }: { request: Request }) => {
 
   return (
     <>
-      <Card className="group border-border hover:shadow-md transition-all duration-200">
+      <Card
+        className="group border-border hover:shadow-md transition-all duration-200 cursor-pointer"
+        onClick={() => setDetailOpen(true)}
+      >
         <CardContent className="p-4 space-y-3">
           <div className="flex items-start justify-between gap-2">
             <h3 className="font-semibold text-sm text-foreground leading-tight">{request.title}</h3>
@@ -84,21 +89,21 @@ export const RequestCard = ({ request }: { request: Request }) => {
               <span>{creatorProfile?.full_name ?? "?"}</span>
             </div>
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setEditOpen(true)}>
+              <Button size="icon" variant="ghost" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); setEditOpen(true); }}>
                 <Pencil className="h-3 w-3" />
               </Button>
               {canMoveBack && (
-                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => moveStage(-1)}>
+                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); moveStage(-1); }}>
                   <ChevronLeft className="h-3 w-3" />
                 </Button>
               )}
               {canMoveForward && (
-                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => moveStage(1)}>
+                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); moveStage(1); }}>
                   <ChevronRight className="h-3 w-3" />
                 </Button>
               )}
               {isCreator && (
-                <Button size="icon" variant="ghost" className="h-6 w-6 text-destructive" onClick={() => deleteReq.mutate(request.id)}>
+                <Button size="icon" variant="ghost" className="h-6 w-6 text-destructive" onClick={(e) => { e.stopPropagation(); deleteReq.mutate(request.id); }}>
                   <Trash2 className="h-3 w-3" />
                 </Button>
               )}
@@ -106,6 +111,7 @@ export const RequestCard = ({ request }: { request: Request }) => {
           </div>
         </CardContent>
       </Card>
+      <RequestDetailDialog request={request} open={detailOpen} onOpenChange={setDetailOpen} />
       <EditRequestDialog request={request} open={editOpen} onOpenChange={setEditOpen} />
     </>
   );
