@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { useCreateRequest } from "@/hooks/useRequests";
 import { useAuth } from "@/contexts/AuthContext";
-import { CATEGORIES } from "@/lib/stages";
+import { CATEGORIES, getCategoryConfig } from "@/lib/categories";
 import { Plus } from "lucide-react";
 
 const priorityLabels: Record<number, string> = {
