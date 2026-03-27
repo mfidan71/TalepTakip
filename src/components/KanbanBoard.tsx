@@ -68,102 +68,117 @@ export const KanbanBoard = () => {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="flex-1 overflow-x-auto">
-        <div
-          className="grid gap-4 p-4"
-          style={{
-            gridTemplateColumns: `repeat(${cols}, minmax(180px, 1fr))`,
-            minWidth: cols * 180,
-          }}
-        >
-          {stages?.map((stage) => {
-            const stageRequests = requests?.filter((r) => r.stage === stage.key) ?? [];
-            return (
-              <div key={stage.key} className="flex flex-col min-h-[200px]">
-                <div className="flex items-center gap-2 mb-3">
-                  <span
-                    className="h-2.5 w-2.5 rounded-full shrink-0"
-                    style={{ backgroundColor: `hsl(${stage.color})` }}
-                  />
-                  <h2 className="font-display text-sm font-semibold text-foreground">{stage.label}</h2>
-                  <span className="text-xs font-medium text-muted-foreground bg-muted rounded-full px-2 py-0.5">
-                    {stageRequests.length}
-                  </span>
-                  <div className="ml-auto flex items-center gap-0.5">
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive">
-                          <Minus className="h-3.5 w-3.5" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Aşamayı Sil</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            "{stage.label}" aşamasını silmek istediğinize emin misiniz? Bu aşamadaki talepler etkilenebilir.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>İptal</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => deleteStage.mutate(stage.id)}>Sil</AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </div>
-                <Droppable droppableId={stage.key}>
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      className={`flex-1 rounded-lg p-1 transition-colors ${snapshot.isDraggingOver ? "bg-accent/50" : ""}`}
-                    >
-                      <div className="space-y-2">
-                        {stageRequests.map((req, index) => (
-                          <Draggable key={req.id} draggableId={req.id} index={index}>
-                            {(provided, snapshot) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className={snapshot.isDragging ? "opacity-80" : ""}
-                              >
-                                <RequestCard request={req} />
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
-                        {stageRequests.length === 0 && !snapshot.isDraggingOver && (
-                          <div className="rounded-lg border-2 border-dashed border-border p-6 text-center">
-                            <p className="text-xs text-muted-foreground">Talep yok</p>
+        <Droppable droppableId="stages-droppable" type="STAGE" direction="horizontal">
+          {(stageDropProvided) => (
+            <div
+              ref={stageDropProvided.innerRef}
+              {...stageDropProvided.droppableProps}
+              className="grid gap-4 p-4"
+              style={{
+                gridTemplateColumns: `repeat(${cols}, minmax(180px, 1fr))`,
+                minWidth: cols * 180,
+              }}
+            >
+              {stages?.map((stage, stageIndex) => {
+                const stageRequests = requests?.filter((r) => r.stage === stage.key) ?? [];
+                return (
+                  <Draggable key={stage.id} draggableId={`stage-${stage.id}`} index={stageIndex}>
+                    {(stageDragProvided, stageDragSnapshot) => (
+                      <div
+                        ref={stageDragProvided.innerRef}
+                        {...stageDragProvided.draggableProps}
+                        className={`flex flex-col min-h-[200px] ${stageDragSnapshot.isDragging ? "opacity-80 bg-muted/50 rounded-lg" : ""}`}
+                      >
+                        <div className="flex items-center gap-2 mb-3" {...stageDragProvided.dragHandleProps}>
+                          <span
+                            className="h-2.5 w-2.5 rounded-full shrink-0 cursor-grab"
+                            style={{ backgroundColor: `hsl(${stage.color})` }}
+                          />
+                          <h2 className="font-display text-sm font-semibold text-foreground cursor-grab">{stage.label}</h2>
+                          <span className="text-xs font-medium text-muted-foreground bg-muted rounded-full px-2 py-0.5">
+                            {stageRequests.length}
+                          </span>
+                          <div className="ml-auto flex items-center gap-0.5">
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive">
+                                  <Minus className="h-3.5 w-3.5" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Aşamayı Sil</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    "{stage.label}" aşamasını silmek istediğinize emin misiniz? Bu aşamadaki talepler etkilenebilir.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>İptal</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => deleteStage.mutate(stage.id)}>Sil</AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           </div>
-                        )}
+                        </div>
+                        <Droppable droppableId={stage.key} type="CARD">
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.droppableProps}
+                              className={`flex-1 rounded-lg p-1 transition-colors ${snapshot.isDraggingOver ? "bg-accent/50" : ""}`}
+                            >
+                              <div className="space-y-2">
+                                {stageRequests.map((req, index) => (
+                                  <Draggable key={req.id} draggableId={req.id} index={index}>
+                                    {(provided, snapshot) => (
+                                      <div
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                        className={snapshot.isDragging ? "opacity-80" : ""}
+                                      >
+                                        <RequestCard request={req} />
+                                      </div>
+                                    )}
+                                  </Draggable>
+                                ))}
+                                {provided.placeholder}
+                                {stageRequests.length === 0 && !snapshot.isDraggingOver && (
+                                  <div className="rounded-lg border-2 border-dashed border-border p-6 text-center">
+                                    <p className="text-xs text-muted-foreground">Talep yok</p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </Droppable>
                       </div>
-                    </div>
-                  )}
-                </Droppable>
+                    )}
+                  </Draggable>
+                );
+              })}
+              {stageDropProvided.placeholder}
+              {/* Add stage shortcut */}
+              <div className="flex flex-col min-h-[200px]">
+                <Popover open={addOpen} onOpenChange={setAddOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-8 w-full gap-1 border-dashed text-muted-foreground">
+                      <Plus className="h-3.5 w-3.5" />
+                      Aşama Ekle
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-64 space-y-3">
+                    <Input placeholder="Anahtar (ör: review)" value={newKey} onChange={(e) => setNewKey(e.target.value)} />
+                    <Input placeholder="Etiket (ör: İnceleme)" value={newLabel} onChange={(e) => setNewLabel(e.target.value)} />
+                    <Button onClick={handleAddStage} className="w-full gap-1" size="sm" disabled={createStage.isPending}>
+                      <Plus className="h-3.5 w-3.5" /> Ekle
+                    </Button>
+                  </PopoverContent>
+                </Popover>
               </div>
-            );
-          })}
-          {/* Add stage shortcut */}
-          <div className="flex flex-col min-h-[200px]">
-            <Popover open={addOpen} onOpenChange={setAddOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8 w-full gap-1 border-dashed text-muted-foreground">
-                  <Plus className="h-3.5 w-3.5" />
-                  Aşama Ekle
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-64 space-y-3">
-                <Input placeholder="Anahtar (ör: review)" value={newKey} onChange={(e) => setNewKey(e.target.value)} />
-                <Input placeholder="Etiket (ör: İnceleme)" value={newLabel} onChange={(e) => setNewLabel(e.target.value)} />
-                <Button onClick={handleAddStage} className="w-full gap-1" size="sm" disabled={createStage.isPending}>
-                  <Plus className="h-3.5 w-3.5" /> Ekle
-                </Button>
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
+            </div>
+          )}
+        </Droppable>
       </div>
     </DragDropContext>
   );
