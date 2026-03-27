@@ -50,7 +50,7 @@ export const KanbanBoard = () => {
     );
   }
 
-  const cols = stages?.length ?? 6;
+  const cols = (stages?.length ?? 6) + 1;
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
