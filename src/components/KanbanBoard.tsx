@@ -16,6 +16,7 @@ export const KanbanBoard = () => {
   const updateReq = useUpdateRequest();
   const createStage = useCreateStage();
   const deleteStage = useDeleteStage();
+  const reorderStages = useReorderStages();
   const [newKey, setNewKey] = useState("");
   const [newLabel, setNewLabel] = useState("");
   const [addOpen, setAddOpen] = useState(false);
