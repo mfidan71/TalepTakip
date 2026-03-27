@@ -1,13 +1,32 @@
+import { useState } from "react";
 import { useRequests, useUpdateRequest } from "@/hooks/useRequests";
-import { useStages } from "@/hooks/useStages";
+import { useStages, useCreateStage, useDeleteStage } from "@/hooks/useStages";
 import { RequestCard } from "@/components/RequestCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
+import { Plus, Minus } from "lucide-react";
 
 export const KanbanBoard = () => {
   const { data: requests, isLoading: loadingReqs } = useRequests();
   const { data: stages, isLoading: loadingStages } = useStages();
   const updateReq = useUpdateRequest();
+  const createStage = useCreateStage();
+  const deleteStage = useDeleteStage();
+  const [newKey, setNewKey] = useState("");
+  const [newLabel, setNewLabel] = useState("");
+  const [addOpen, setAddOpen] = useState(false);
+
+  const handleAddStage = () => {
+    if (!newKey.trim() || !newLabel.trim()) return;
+    createStage.mutate(
+      { key: newKey.trim().toLowerCase(), label: newLabel.trim(), sort_order: stages?.length ?? 0 },
+      { onSuccess: () => { setNewKey(""); setNewLabel(""); setAddOpen(false); } }
+    );
+  };
 
   const onDragEnd = (result: DropResult) => {
     const { draggableId, destination } = result;
