@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { useCreateRequest } from "@/hooks/useRequests";
 import { useAuth } from "@/contexts/AuthContext";
-import { CATEGORIES } from "@/lib/stages";
+import { CATEGORIES, getCategoryConfig } from "@/lib/categories";
 import { Plus } from "lucide-react";
 
 const priorityLabels: Record<number, string> = {
@@ -93,9 +93,18 @@ export const CreateRequestDialog = () => {
                 <SelectValue placeholder="Kategori seçin" />
               </SelectTrigger>
               <SelectContent>
-                {CATEGORIES.map((c) => (
-                  <SelectItem key={c} value={c}>{c}</SelectItem>
-                ))}
+                {CATEGORIES.map((c) => {
+                  const conf = getCategoryConfig(c);
+                  const Icon = conf.icon;
+                  return (
+                    <SelectItem key={c} value={c}>
+                      <span className={`inline-flex items-center gap-1.5 ${conf.className}`}>
+                        <Icon className="h-3.5 w-3.5" />
+                        {c}
+                      </span>
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>

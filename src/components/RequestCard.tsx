@@ -19,6 +19,7 @@ import {
   Flame,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { getCategoryConfig } from "@/lib/categories";
 
 const priorityConfig: Record<number, { label: string; icon: React.ElementType; className: string }> = {
   1: { label: "Çok Düşük", icon: ArrowDown, className: "text-priority-1" },
@@ -72,11 +73,16 @@ export const RequestCard = ({ request }: { request: Request }) => {
           )}
 
           <div className="flex flex-wrap items-center gap-1.5">
-            {request.category && (
-              <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                {request.category}
-              </Badge>
-            )}
+            {request.category && (() => {
+              const catConf = getCategoryConfig(request.category);
+              const CatIcon = catConf.icon;
+              return (
+                <Badge variant="outline" className={`text-[10px] px-1.5 py-0 gap-0.5 ${catConf.bgClassName}`}>
+                  <CatIcon className="h-3 w-3" />
+                  {request.category}
+                </Badge>
+              );
+            })()}
             <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${prio.className}`}>
               <PrioIcon className="h-3 w-3 mr-0.5" />
               {prio.label}

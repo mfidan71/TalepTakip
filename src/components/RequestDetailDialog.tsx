@@ -11,9 +11,9 @@ import {
   Minus,
   ArrowUpRight,
   Flame,
-  Tag,
   Layers,
 } from "lucide-react";
+import { getCategoryConfig } from "@/lib/categories";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 
@@ -64,12 +64,16 @@ export const RequestDetailDialog = ({ request, open, onOpenChange }: Props) => {
             <PrioIcon className="h-3.5 w-3.5" />
             {prio.label}
           </Badge>
-          {request.category && (
-            <Badge variant="secondary" className="gap-1">
-              <Tag className="h-3 w-3" />
-              {request.category}
-            </Badge>
-          )}
+          {request.category && (() => {
+            const catConf = getCategoryConfig(request.category);
+            const CatIcon = catConf.icon;
+            return (
+              <Badge variant="outline" className={`gap-1 ${catConf.bgClassName}`}>
+                <CatIcon className="h-3.5 w-3.5" />
+                {request.category}
+              </Badge>
+            );
+          })()}
         </div>
 
         <Separator />
