@@ -30,8 +30,20 @@ export const KanbanBoard = () => {
   };
 
   const onDragEnd = (result: DropResult) => {
-    const { draggableId, destination } = result;
+    const { draggableId, destination, source, type } = result;
     if (!destination) return;
+
+    if (type === "STAGE") {
+      if (source.index === destination.index) return;
+      if (!stages) return;
+      const reordered = Array.from(stages);
+      const [moved] = reordered.splice(source.index, 1);
+      reordered.splice(destination.index, 0, moved);
+      const orderedIds = reordered.map((s, i) => ({ id: s.id, sort_order: i }));
+      reorderStages.mutate(orderedIds);
+      return;
+    }
+
     const newStage = destination.droppableId;
     const request = requests?.find((r) => r.id === draggableId);
     if (!request || request.stage === newStage) return;
