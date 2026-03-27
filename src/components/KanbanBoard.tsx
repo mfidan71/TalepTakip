@@ -1,13 +1,32 @@
+import { useState } from "react";
 import { useRequests, useUpdateRequest } from "@/hooks/useRequests";
-import { useStages } from "@/hooks/useStages";
+import { useStages, useCreateStage, useDeleteStage } from "@/hooks/useStages";
 import { RequestCard } from "@/components/RequestCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
+import { Plus, Minus } from "lucide-react";
 
 export const KanbanBoard = () => {
   const { data: requests, isLoading: loadingReqs } = useRequests();
   const { data: stages, isLoading: loadingStages } = useStages();
   const updateReq = useUpdateRequest();
+  const createStage = useCreateStage();
+  const deleteStage = useDeleteStage();
+  const [newKey, setNewKey] = useState("");
+  const [newLabel, setNewLabel] = useState("");
+  const [addOpen, setAddOpen] = useState(false);
+
+  const handleAddStage = () => {
+    if (!newKey.trim() || !newLabel.trim()) return;
+    createStage.mutate(
+      { key: newKey.trim().toLowerCase(), label: newLabel.trim(), sort_order: stages?.length ?? 0 },
+      { onSuccess: () => { setNewKey(""); setNewLabel(""); setAddOpen(false); } }
+    );
+  };
 
   const onDragEnd = (result: DropResult) => {
     const { draggableId, destination } = result;
@@ -31,7 +50,7 @@ export const KanbanBoard = () => {
     );
   }
 
-  const cols = stages?.length ?? 6;
+  const cols = (stages?.length ?? 6) + 1;
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -53,9 +72,30 @@ export const KanbanBoard = () => {
                     style={{ backgroundColor: `hsl(${stage.color})` }}
                   />
                   <h2 className="font-display text-sm font-semibold text-foreground">{stage.label}</h2>
-                  <span className="ml-auto text-xs font-medium text-muted-foreground bg-muted rounded-full px-2 py-0.5">
+                  <span className="text-xs font-medium text-muted-foreground bg-muted rounded-full px-2 py-0.5">
                     {stageRequests.length}
                   </span>
+                  <div className="ml-auto flex items-center gap-0.5">
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive">
+                          <Minus className="h-3.5 w-3.5" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Aşamayı Sil</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            "{stage.label}" aşamasını silmek istediğinize emin misiniz? Bu aşamadaki talepler etkilenebilir.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>İptal</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => deleteStage.mutate(stage.id)}>Sil</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </div>
                 <Droppable droppableId={stage.key}>
                   {(provided, snapshot) => (
@@ -92,6 +132,24 @@ export const KanbanBoard = () => {
               </div>
             );
           })}
+          {/* Add stage shortcut */}
+          <div className="flex flex-col min-h-[200px]">
+            <Popover open={addOpen} onOpenChange={setAddOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 w-full gap-1 border-dashed text-muted-foreground">
+                  <Plus className="h-3.5 w-3.5" />
+                  Aşama Ekle
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 space-y-3">
+                <Input placeholder="Anahtar (ör: review)" value={newKey} onChange={(e) => setNewKey(e.target.value)} />
+                <Input placeholder="Etiket (ör: İnceleme)" value={newLabel} onChange={(e) => setNewLabel(e.target.value)} />
+                <Button onClick={handleAddStage} className="w-full gap-1" size="sm" disabled={createStage.isPending}>
+                  <Plus className="h-3.5 w-3.5" /> Ekle
+                </Button>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
       </div>
     </DragDropContext>
