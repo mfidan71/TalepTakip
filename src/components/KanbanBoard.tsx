@@ -72,9 +72,30 @@ export const KanbanBoard = () => {
                     style={{ backgroundColor: `hsl(${stage.color})` }}
                   />
                   <h2 className="font-display text-sm font-semibold text-foreground">{stage.label}</h2>
-                  <span className="ml-auto text-xs font-medium text-muted-foreground bg-muted rounded-full px-2 py-0.5">
+                  <span className="text-xs font-medium text-muted-foreground bg-muted rounded-full px-2 py-0.5">
                     {stageRequests.length}
                   </span>
+                  <div className="ml-auto flex items-center gap-0.5">
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive">
+                          <Minus className="h-3.5 w-3.5" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Aşamayı Sil</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            "{stage.label}" aşamasını silmek istediğinize emin misiniz? Bu aşamadaki talepler etkilenebilir.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>İptal</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => deleteStage.mutate(stage.id)}>Sil</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </div>
                 <Droppable droppableId={stage.key}>
                   {(provided, snapshot) => (
