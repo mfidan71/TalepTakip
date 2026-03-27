@@ -132,6 +132,24 @@ export const KanbanBoard = () => {
               </div>
             );
           })}
+          {/* Add stage shortcut */}
+          <div className="flex flex-col min-h-[200px]">
+            <Popover open={addOpen} onOpenChange={setAddOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 w-full gap-1 border-dashed text-muted-foreground">
+                  <Plus className="h-3.5 w-3.5" />
+                  Aşama Ekle
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 space-y-3">
+                <Input placeholder="Anahtar (ör: review)" value={newKey} onChange={(e) => setNewKey(e.target.value)} />
+                <Input placeholder="Etiket (ör: İnceleme)" value={newLabel} onChange={(e) => setNewLabel(e.target.value)} />
+                <Button onClick={handleAddStage} className="w-full gap-1" size="sm" disabled={createStage.isPending}>
+                  <Plus className="h-3.5 w-3.5" /> Ekle
+                </Button>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
       </div>
     </DragDropContext>
