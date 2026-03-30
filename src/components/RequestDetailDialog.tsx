@@ -1,7 +1,10 @@
 import { Request, useProfiles } from "@/hooks/useRequests";
 import { useStages } from "@/hooks/useStages";
+import { useRequestVotes, useToggleVote, useVoteHelpers } from "@/hooks/useVotes";
+import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   User,
@@ -12,6 +15,7 @@ import {
   ArrowUpRight,
   Flame,
   Layers,
+  ThumbsUp,
 } from "lucide-react";
 import { getCategoryConfig } from "@/lib/categories";
 import { format } from "date-fns";
@@ -32,8 +36,12 @@ interface Props {
 }
 
 export const RequestDetailDialog = ({ request, open, onOpenChange }: Props) => {
+  const { user } = useAuth();
   const { data: profiles } = useProfiles();
   const { data: stages } = useStages();
+  const { data: votes } = useRequestVotes();
+  const toggleVote = useToggleVote();
+  const { voteCount, hasVoted } = useVoteHelpers(request.id, user?.id, votes);
 
   const creatorProfile = profiles?.find((p) => p.user_id === request.created_by);
   const assigneeProfile = profiles?.find((p) => p.user_id === request.assigned_to);
@@ -123,6 +131,25 @@ export const RequestDetailDialog = ({ request, open, onOpenChange }: Props) => {
               {format(new Date(request.updated_at), "d MMM yyyy, HH:mm", { locale: tr })}
             </p>
           </div>
+        </div>
+
+        <Separator />
+
+        <div className="flex items-center gap-3">
+          <Button
+            variant={hasVoted ? "default" : "outline"}
+            size="sm"
+            className="gap-1.5"
+            onClick={() => {
+              if (user) toggleVote.mutate({ requestId: request.id, userId: user.id });
+            }}
+          >
+            <ThumbsUp className="h-4 w-4" fill={hasVoted ? "currentColor" : "none"} />
+            {hasVoted ? "Oy Verildi" : "Oy Ver"}
+          </Button>
+          <span className="text-sm text-muted-foreground font-medium">
+            {voteCount} oy
+          </span>
         </div>
       </DialogContent>
     </Dialog>

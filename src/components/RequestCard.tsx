@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Request, useUpdateRequest, useDeleteRequest, useProfiles } from "@/hooks/useRequests";
 import { useStages } from "@/hooks/useStages";
+import { useRequestVotes, useToggleVote, useVoteHelpers } from "@/hooks/useVotes";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ import {
   Minus,
   ArrowUpRight,
   Flame,
+  ThumbsUp,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getCategoryConfig } from "@/lib/categories";
@@ -37,6 +39,9 @@ export const RequestCard = ({ request }: { request: Request }) => {
   const { user } = useAuth();
   const { data: profiles } = useProfiles();
   const { data: stages } = useStages();
+  const { data: votes } = useRequestVotes();
+  const toggleVote = useToggleVote();
+  const { voteCount, hasVoted } = useVoteHelpers(request.id, user?.id, votes);
 
   const stageIndex = stages?.findIndex((s) => s.key === request.stage) ?? -1;
   const canMoveForward = stages ? stageIndex < stages.length - 1 : false;
@@ -90,9 +95,27 @@ export const RequestCard = ({ request }: { request: Request }) => {
           </div>
 
           <div className="flex items-center justify-between pt-1 border-t border-border">
-            <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-              <User className="h-3 w-3" />
-              <span>{creatorProfile?.full_name ?? "?"}</span>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                <User className="h-3 w-3" />
+                <span>{creatorProfile?.full_name ?? "?"}</span>
+              </div>
+              <Button
+                size="icon"
+                variant="ghost"
+                className={`h-6 w-6 gap-0.5 ${hasVoted ? "text-primary" : "text-muted-foreground"}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (user) toggleVote.mutate({ requestId: request.id, userId: user.id });
+                }}
+              >
+                <ThumbsUp className="h-3 w-3" fill={hasVoted ? "currentColor" : "none"} />
+              </Button>
+              {voteCount > 0 && (
+                <span className={`text-[10px] font-semibold -ml-1.5 ${hasVoted ? "text-primary" : "text-muted-foreground"}`}>
+                  {voteCount}
+                </span>
+              )}
             </div>
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               <Button size="icon" variant="ghost" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); setEditOpen(true); }}>
