@@ -36,8 +36,12 @@ interface Props {
 }
 
 export const RequestDetailDialog = ({ request, open, onOpenChange }: Props) => {
+  const { user } = useAuth();
   const { data: profiles } = useProfiles();
   const { data: stages } = useStages();
+  const { data: votes } = useRequestVotes();
+  const toggleVote = useToggleVote();
+  const { voteCount, hasVoted } = useVoteHelpers(request.id, user?.id, votes);
 
   const creatorProfile = profiles?.find((p) => p.user_id === request.created_by);
   const assigneeProfile = profiles?.find((p) => p.user_id === request.assigned_to);
