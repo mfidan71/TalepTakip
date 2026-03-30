@@ -39,6 +39,9 @@ export const RequestCard = ({ request }: { request: Request }) => {
   const { user } = useAuth();
   const { data: profiles } = useProfiles();
   const { data: stages } = useStages();
+  const { data: votes } = useRequestVotes();
+  const toggleVote = useToggleVote();
+  const { voteCount, hasVoted } = useVoteHelpers(request.id, user?.id, votes);
 
   const stageIndex = stages?.findIndex((s) => s.key === request.stage) ?? -1;
   const canMoveForward = stages ? stageIndex < stages.length - 1 : false;
