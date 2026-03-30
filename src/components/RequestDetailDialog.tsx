@@ -132,6 +132,25 @@ export const RequestDetailDialog = ({ request, open, onOpenChange }: Props) => {
             </p>
           </div>
         </div>
+
+        <Separator />
+
+        <div className="flex items-center gap-3">
+          <Button
+            variant={hasVoted ? "default" : "outline"}
+            size="sm"
+            className="gap-1.5"
+            onClick={() => {
+              if (user) toggleVote.mutate({ requestId: request.id, userId: user.id });
+            }}
+          >
+            <ThumbsUp className="h-4 w-4" fill={hasVoted ? "currentColor" : "none"} />
+            {hasVoted ? "Oy Verildi" : "Oy Ver"}
+          </Button>
+          <span className="text-sm text-muted-foreground font-medium">
+            {voteCount} oy
+          </span>
+        </div>
       </DialogContent>
     </Dialog>
   );
