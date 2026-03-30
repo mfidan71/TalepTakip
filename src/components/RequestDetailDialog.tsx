@@ -1,7 +1,10 @@
 import { Request, useProfiles } from "@/hooks/useRequests";
 import { useStages } from "@/hooks/useStages";
+import { useRequestVotes, useToggleVote, useVoteHelpers } from "@/hooks/useVotes";
+import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   User,
@@ -12,6 +15,7 @@ import {
   ArrowUpRight,
   Flame,
   Layers,
+  ThumbsUp,
 } from "lucide-react";
 import { getCategoryConfig } from "@/lib/categories";
 import { format } from "date-fns";
