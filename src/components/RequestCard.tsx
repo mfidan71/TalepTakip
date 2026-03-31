@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Request, useUpdateRequest, useDeleteRequest, useProfiles } from "@/hooks/useRequests";
 import { useStages } from "@/hooks/useStages";
+import { useActiveBoard } from "@/contexts/BoardContext";
 import { useRequestVotes, useToggleVote, useVoteHelpers } from "@/hooks/useVotes";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
