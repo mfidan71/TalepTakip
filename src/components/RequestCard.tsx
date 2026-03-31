@@ -39,7 +39,8 @@ export const RequestCard = ({ request }: { request: Request }) => {
   const deleteReq = useDeleteRequest();
   const { user } = useAuth();
   const { data: profiles } = useProfiles();
-  const { data: stages } = useStages();
+  const { activeBoardId } = useActiveBoard();
+  const { data: stages } = useStages(activeBoardId);
   const { data: votes } = useRequestVotes();
   const toggleVote = useToggleVote();
   const { voteCount, hasVoted } = useVoteHelpers(request.id, user?.id, votes);
