@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      boards: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -105,6 +132,7 @@ export type Database = {
       requests: {
         Row: {
           assigned_to: string | null
+          board_id: string | null
           category: string | null
           created_at: string
           created_by: string
@@ -117,6 +145,7 @@ export type Database = {
         }
         Insert: {
           assigned_to?: string | null
+          board_id?: string | null
           category?: string | null
           created_at?: string
           created_by: string
@@ -129,6 +158,7 @@ export type Database = {
         }
         Update: {
           assigned_to?: string | null
+          board_id?: string | null
           category?: string | null
           created_at?: string
           created_by?: string
@@ -139,10 +169,19 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "requests_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "boards"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stages: {
         Row: {
+          board_id: string | null
           color: string
           created_at: string
           id: string
@@ -151,6 +190,7 @@ export type Database = {
           sort_order: number
         }
         Insert: {
+          board_id?: string | null
           color?: string
           created_at?: string
           id?: string
@@ -159,6 +199,7 @@ export type Database = {
           sort_order?: number
         }
         Update: {
+          board_id?: string | null
           color?: string
           created_at?: string
           id?: string
@@ -166,7 +207,15 @@ export type Database = {
           label?: string
           sort_order?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "stages_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "boards"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useStages, useCreateStage, useDeleteStage } from "@/hooks/useStages";
+import { useActiveBoard } from "@/contexts/BoardContext";
 import { Settings2, Trash2, Plus } from "lucide-react";
 
 export const StageManagerDialog = () => {
-  const { data: stages } = useStages();
+  const { activeBoardId } = useActiveBoard();
+  const { data: stages } = useStages(activeBoardId);
   const createStage = useCreateStage();
   const deleteStage = useDeleteStage();
   const [label, setLabel] = useState("");
@@ -17,7 +19,7 @@ export const StageManagerDialog = () => {
     if (!label.trim() || !key.trim()) return;
     const nextOrder = (stages?.length ?? 0);
     createStage.mutate(
-      { key: key.trim().toLowerCase(), label: label.trim(), sort_order: nextOrder },
+      { key: key.trim().toLowerCase(), label: label.trim(), sort_order: nextOrder, board_id: activeBoardId ?? undefined },
       { onSuccess: () => { setLabel(""); setKey(""); } }
     );
   };

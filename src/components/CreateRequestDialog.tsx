@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { useCreateRequest } from "@/hooks/useRequests";
 import { useAuth } from "@/contexts/AuthContext";
+import { useActiveBoard } from "@/contexts/BoardContext";
 import { CATEGORIES, getCategoryConfig } from "@/lib/categories";
 import { Plus } from "lucide-react";
 
@@ -27,6 +28,7 @@ export const CreateRequestDialog = () => {
   const [priority, setPriority] = useState(3);
   const createReq = useCreateRequest();
   const { user } = useAuth();
+  const { activeBoardId } = useActiveBoard();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +40,7 @@ export const CreateRequestDialog = () => {
         category: category || undefined,
         priority,
         created_by: user.id,
+        board_id: activeBoardId ?? undefined,
       },
       {
         onSuccess: () => {
