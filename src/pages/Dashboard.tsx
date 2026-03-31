@@ -1,12 +1,17 @@
 import { AppHeader } from "@/components/AppHeader";
+import { BoardSelector } from "@/components/BoardSelector";
 import { KanbanBoard } from "@/components/KanbanBoard";
+import { BoardProvider } from "@/contexts/BoardContext";
 
 const Dashboard = () => {
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      <AppHeader />
-      <KanbanBoard />
-    </div>
+    <BoardProvider>
+      <div className="flex flex-col min-h-screen bg-background">
+        <AppHeader />
+        <BoardSelector />
+        <KanbanBoard />
+      </div>
+    </BoardProvider>
   );
 };
 

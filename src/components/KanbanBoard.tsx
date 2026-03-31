@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useRequests, useUpdateRequest } from "@/hooks/useRequests";
 import { useStages, useCreateStage, useDeleteStage, useReorderStages } from "@/hooks/useStages";
+import { useActiveBoard } from "@/contexts/BoardContext";
 import { RequestCard } from "@/components/RequestCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -11,8 +12,9 @@ import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea
 import { Plus, Minus } from "lucide-react";
 
 export const KanbanBoard = () => {
-  const { data: requests, isLoading: loadingReqs } = useRequests();
-  const { data: stages, isLoading: loadingStages } = useStages();
+  const { activeBoardId } = useActiveBoard();
+  const { data: requests, isLoading: loadingReqs } = useRequests(activeBoardId);
+  const { data: stages, isLoading: loadingStages } = useStages(activeBoardId);
   const updateReq = useUpdateRequest();
   const createStage = useCreateStage();
   const deleteStage = useDeleteStage();
@@ -24,7 +26,7 @@ export const KanbanBoard = () => {
   const handleAddStage = () => {
     if (!newKey.trim() || !newLabel.trim()) return;
     createStage.mutate(
-      { key: newKey.trim().toLowerCase(), label: newLabel.trim(), sort_order: stages?.length ?? 0 },
+      { key: newKey.trim().toLowerCase(), label: newLabel.trim(), sort_order: stages?.length ?? 0, board_id: activeBoardId ?? undefined },
       { onSuccess: () => { setNewKey(""); setNewLabel(""); setAddOpen(false); } }
     );
   };
@@ -50,6 +52,14 @@ export const KanbanBoard = () => {
     updateReq.mutate({ id: draggableId, stage: newStage });
   };
 
+  if (!activeBoardId) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-8">
+        <p className="text-muted-foreground text-sm">Başlamak için bir pano oluşturun veya seçin.</p>
+      </div>
+    );
+  }
+
   if (loadingReqs || loadingStages) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 p-4">
@@ -63,7 +73,7 @@ export const KanbanBoard = () => {
     );
   }
 
-  const cols = (stages?.length ?? 6) + 1;
+  const cols = (stages?.length ?? 0) + 1;
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -158,7 +168,6 @@ export const KanbanBoard = () => {
                 );
               })}
               {stageDropProvided.placeholder}
-              {/* Add stage shortcut */}
               <div className="flex flex-col min-h-[200px]">
                 <Popover open={addOpen} onOpenChange={setAddOpen}>
                   <PopoverTrigger asChild>

@@ -28,6 +28,7 @@ export const CreateRequestDialog = () => {
   const [priority, setPriority] = useState(3);
   const createReq = useCreateRequest();
   const { user } = useAuth();
+  const { activeBoardId } = useActiveBoard();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
