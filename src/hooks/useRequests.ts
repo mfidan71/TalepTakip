@@ -5,18 +5,25 @@ import { toast } from "sonner";
 
 export type Request = Tables<"requests">;
 
-export const useRequests = () => {
+export const useRequests = (boardId?: string | null) => {
   return useQuery({
-    queryKey: ["requests"],
+    queryKey: ["requests", boardId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("requests")
         .select("*")
         .order("priority", { ascending: false })
         .order("created_at", { ascending: false });
+      if (boardId) {
+        query = query.eq("board_id", boardId);
+      } else {
+        query = query.is("board_id", null);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
+    enabled: boardId !== undefined,
   });
 };
 
@@ -34,7 +41,7 @@ export const useProfiles = () => {
 export const useCreateRequest = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (req: { title: string; description?: string; category?: string; priority: number; created_by: string }) => {
+    mutationFn: async (req: { title: string; description?: string; category?: string; priority: number; created_by: string; board_id?: string }) => {
       const { data, error } = await supabase.from("requests").insert(req).select().single();
       if (error) throw error;
       return data;
@@ -56,14 +63,18 @@ export const useUpdateRequest = () => {
     },
     onMutate: async ({ id, ...updates }) => {
       await qc.cancelQueries({ queryKey: ["requests"] });
-      const previous = qc.getQueryData<Request[]>(["requests"]);
-      qc.setQueryData<Request[]>(["requests"], (old) =>
-        old?.map((r) => (r.id === id ? { ...r, ...updates } : r))
-      );
-      return { previous };
+      const allQueries = qc.getQueriesData<Request[]>({ queryKey: ["requests"] });
+      allQueries.forEach(([key, data]) => {
+        if (data) {
+          qc.setQueryData<Request[]>(key, data.map((r) => (r.id === id ? { ...r, ...updates } : r)));
+        }
+      });
+      return { allQueries };
     },
     onError: (e: Error, _vars, context) => {
-      if (context?.previous) qc.setQueryData(["requests"], context.previous);
+      context?.allQueries.forEach(([key, data]) => {
+        if (data) qc.setQueryData(key, data);
+      });
       toast.error(e.message);
     },
     onSettled: () => {

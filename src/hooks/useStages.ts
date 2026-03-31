@@ -9,26 +9,34 @@ export type Stage = {
   color: string;
   sort_order: number;
   created_at: string;
+  board_id: string | null;
 };
 
-export const useStages = () => {
+export const useStages = (boardId?: string | null) => {
   return useQuery({
-    queryKey: ["stages"],
+    queryKey: ["stages", boardId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("stages")
         .select("*")
         .order("sort_order", { ascending: true });
+      if (boardId) {
+        query = query.eq("board_id", boardId);
+      } else {
+        query = query.is("board_id", null);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       return data as Stage[];
     },
+    enabled: boardId !== undefined,
   });
 };
 
 export const useCreateStage = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (stage: { key: string; label: string; color?: string; sort_order: number }) => {
+    mutationFn: async (stage: { key: string; label: string; color?: string; sort_order: number; board_id?: string }) => {
       const { data, error } = await supabase.from("stages").insert(stage).select().single();
       if (error) throw error;
       return data;
@@ -69,18 +77,22 @@ export const useReorderStages = () => {
     },
     onMutate: async (orderedIds) => {
       await qc.cancelQueries({ queryKey: ["stages"] });
-      const previous = qc.getQueryData<Stage[]>(["stages"]);
-      if (previous) {
-        const orderMap = new Map(orderedIds.map((o) => [o.id, o.sort_order]));
-        const updated = previous
-          .map((s) => ({ ...s, sort_order: orderMap.get(s.id) ?? s.sort_order }))
-          .sort((a, b) => a.sort_order - b.sort_order);
-        qc.setQueryData(["stages"], updated);
-      }
-      return { previous };
+      const allQueries = qc.getQueriesData<Stage[]>({ queryKey: ["stages"] });
+      allQueries.forEach(([key, data]) => {
+        if (data) {
+          const orderMap = new Map(orderedIds.map((o) => [o.id, o.sort_order]));
+          const updated = data
+            .map((s) => ({ ...s, sort_order: orderMap.get(s.id) ?? s.sort_order }))
+            .sort((a, b) => a.sort_order - b.sort_order);
+          qc.setQueryData(key, updated);
+        }
+      });
+      return { allQueries };
     },
     onError: (e: Error, _vars, context) => {
-      if (context?.previous) qc.setQueryData(["stages"], context.previous);
+      context?.allQueries.forEach(([key, data]) => {
+        if (data) qc.setQueryData(key, data);
+      });
       toast.error(e.message);
     },
     onSettled: () => {
