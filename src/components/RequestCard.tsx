@@ -62,22 +62,30 @@ export const RequestCard = ({ request }: { request: Request }) => {
   return (
     <>
       <Card
-        className="group border-border hover:shadow-md transition-all duration-200 cursor-pointer"
+        className="group border-border hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden"
         onClick={() => setDetailOpen(true)}
       >
-        <CardContent className="p-4 space-y-3">
-          <div className="flex items-start justify-between gap-2">
-            <h3 className="font-semibold text-sm text-foreground leading-tight">{request.title}</h3>
-            <div className={`shrink-0 flex items-center gap-1 ${prio.className}`} title={prio.label}>
-              <PrioIcon className="h-4 w-4" strokeWidth={2.5} />
+        <CardContent className="p-3 space-y-2">
+          {/* Top: user avatar + name + priority icon */}
+          <div className="flex items-center gap-2">
+            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-muted shrink-0">
+              <User className="h-3 w-3 text-muted-foreground" />
+            </div>
+            <span className="text-[10px] text-muted-foreground truncate">{creatorProfile?.full_name ?? "?"}</span>
+            <div className={`ml-auto shrink-0 flex items-center gap-0.5 ${prio.className}`} title={prio.label}>
+              <PrioIcon className="h-3.5 w-3.5" strokeWidth={2.5} />
             </div>
           </div>
+
+          {/* Title */}
+          <h3 className="font-semibold text-sm text-foreground leading-tight">{request.title}</h3>
 
           {request.description && (
             <p className="text-xs text-muted-foreground line-clamp-2">{request.description}</p>
           )}
 
-          <div className="flex flex-wrap items-center gap-1.5">
+          {/* Badges */}
+          <div className="flex flex-wrap items-center gap-1">
             {request.category && (() => {
               const catConf = getCategoryConfig(request.category);
               const CatIcon = catConf.icon;
@@ -94,45 +102,40 @@ export const RequestCard = ({ request }: { request: Request }) => {
             </Badge>
           </div>
 
-          <div className="flex items-center justify-between pt-1 border-t border-border">
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                <User className="h-3 w-3" />
-                <span>{creatorProfile?.full_name ?? "?"}</span>
-              </div>
-              <Button
-                size="icon"
-                variant="ghost"
-                className={`h-6 w-6 gap-0.5 ${hasVoted ? "text-primary" : "text-muted-foreground"}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (user) toggleVote.mutate({ requestId: request.id, userId: user.id });
-                }}
-              >
-                <ThumbsUp className="h-3 w-3" fill={hasVoted ? "currentColor" : "none"} />
-              </Button>
-              {voteCount > 0 && (
-                <span className={`text-[10px] font-semibold -ml-1.5 ${hasVoted ? "text-primary" : "text-muted-foreground"}`}>
-                  {voteCount}
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button size="icon" variant="ghost" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); setEditOpen(true); }}>
+          {/* Bottom: action buttons only */}
+          <div className="flex items-center pt-1.5 border-t border-border gap-0.5">
+            <Button
+              size="icon"
+              variant="ghost"
+              className={`h-6 w-6 ${hasVoted ? "text-primary" : "text-muted-foreground"}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (user) toggleVote.mutate({ requestId: request.id, userId: user.id });
+              }}
+            >
+              <ThumbsUp className="h-3 w-3" fill={hasVoted ? "currentColor" : "none"} />
+            </Button>
+            {voteCount > 0 && (
+              <span className={`text-[10px] font-semibold ${hasVoted ? "text-primary" : "text-muted-foreground"}`}>
+                {voteCount}
+              </span>
+            )}
+            <div className="flex items-center gap-0.5 ml-auto">
+              <Button size="icon" variant="ghost" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); setEditOpen(true); }}>
                 <Pencil className="h-3 w-3" />
               </Button>
               {canMoveBack && (
-                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); moveStage(-1); }}>
+                <Button size="icon" variant="ghost" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); moveStage(-1); }}>
                   <ChevronLeft className="h-3 w-3" />
                 </Button>
               )}
               {canMoveForward && (
-                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); moveStage(1); }}>
+                <Button size="icon" variant="ghost" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); moveStage(1); }}>
                   <ChevronRight className="h-3 w-3" />
                 </Button>
               )}
               {isCreator && (
-                <Button size="icon" variant="ghost" className="h-6 w-6 text-destructive" onClick={(e) => { e.stopPropagation(); deleteReq.mutate(request.id); }}>
+                <Button size="icon" variant="ghost" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-destructive" onClick={(e) => { e.stopPropagation(); deleteReq.mutate(request.id); }}>
                   <Trash2 className="h-3 w-3" />
                 </Button>
               )}
