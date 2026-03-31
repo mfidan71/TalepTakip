@@ -40,6 +40,7 @@ export const CreateRequestDialog = () => {
         category: category || undefined,
         priority,
         created_by: user.id,
+        board_id: activeBoardId ?? undefined,
       },
       {
         onSuccess: () => {

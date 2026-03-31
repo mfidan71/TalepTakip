@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useStages, useCreateStage, useDeleteStage } from "@/hooks/useStages";
+import { useActiveBoard } from "@/contexts/BoardContext";
 import { Settings2, Trash2, Plus } from "lucide-react";
 
 export const StageManagerDialog = () => {
