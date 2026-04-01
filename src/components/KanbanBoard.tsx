@@ -12,6 +12,58 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { Plus, Minus } from "lucide-react";
 
+const QuickAddCard = ({ stageKey }: { stageKey: string }) => {
+  const [adding, setAdding] = useState(false);
+  const [title, setTitle] = useState("");
+  const createReq = useCreateRequest();
+  const { user } = useAuth();
+  const { activeBoardId } = useActiveBoard();
+
+  const handleAdd = () => {
+    if (!title.trim() || !user) return;
+    createReq.mutate(
+      { title: title.trim(), created_by: user.id, board_id: activeBoardId ?? undefined, stage: stageKey },
+      { onSuccess: () => { setTitle(""); setAdding(false); } }
+    );
+  };
+
+  if (!adding) {
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        className="w-full gap-1 text-muted-foreground border border-dashed border-border mt-2"
+        onClick={() => setAdding(true)}
+      >
+        <Plus className="h-3.5 w-3.5" /> Talep Ekle
+      </Button>
+    );
+  }
+
+  return (
+    <div className="mt-2 space-y-2">
+      <Input
+        autoFocus
+        placeholder="Talep başlığı..."
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") handleAdd();
+          if (e.key === "Escape") { setAdding(false); setTitle(""); }
+        }}
+      />
+      <div className="flex gap-1">
+        <Button size="sm" className="flex-1" onClick={handleAdd} disabled={createReq.isPending}>
+          Ekle
+        </Button>
+        <Button size="sm" variant="ghost" onClick={() => { setAdding(false); setTitle(""); }}>
+          İptal
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 export const KanbanBoard = () => {
   const { activeBoardId } = useActiveBoard();
   const { data: requests, isLoading: loadingReqs } = useRequests(activeBoardId);
