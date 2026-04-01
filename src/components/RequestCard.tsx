@@ -6,6 +6,7 @@ import { useRequestVotes, useToggleVote, useVoteHelpers } from "@/hooks/useVotes
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { EditRequestDialog } from "@/components/EditRequestDialog";
 import { RequestDetailDialog } from "@/components/RequestDetailDialog";
 import {
@@ -104,42 +105,67 @@ export const RequestCard = ({ request }: { request: Request }) => {
             </Badge>
           </div>
 
-          {/* Bottom: action buttons only */}
+          {/* Bottom: action buttons with tooltips */}
           <div className="flex items-center pt-1.5 border-t border-border gap-0.5">
-            <Button
-              size="icon"
-              variant="ghost"
-              className={`h-6 w-6 ${hasVoted ? "text-primary" : "text-muted-foreground"}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (user) toggleVote.mutate({ requestId: request.id, userId: user.id });
-              }}
-            >
-              <ThumbsUp className="h-3 w-3" fill={hasVoted ? "currentColor" : "none"} />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className={`h-6 w-6 ${hasVoted ? "text-primary" : "text-muted-foreground"}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (user) toggleVote.mutate({ requestId: request.id, userId: user.id });
+                  }}
+                >
+                  <ThumbsUp className="h-3 w-3" fill={hasVoted ? "currentColor" : "none"} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Oy Ver</TooltipContent>
+            </Tooltip>
             {voteCount > 0 && (
               <span className={`text-[10px] font-semibold ${hasVoted ? "text-primary" : "text-muted-foreground"}`}>
                 {voteCount}
               </span>
             )}
             <div className="flex items-center gap-0.5 ml-auto">
-              <Button size="icon" variant="ghost" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); setEditOpen(true); }}>
-                <Pencil className="h-3 w-3" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="icon" variant="ghost" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); setEditOpen(true); }}>
+                    <Pencil className="h-3 w-3" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Düzenle</TooltipContent>
+              </Tooltip>
               {canMoveBack && (
-                <Button size="icon" variant="ghost" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); moveStage(-1); }}>
-                  <ChevronLeft className="h-3 w-3" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button size="icon" variant="ghost" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); moveStage(-1); }}>
+                      <ChevronLeft className="h-3 w-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Geri Taşı</TooltipContent>
+                </Tooltip>
               )}
               {canMoveForward && (
-                <Button size="icon" variant="ghost" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); moveStage(1); }}>
-                  <ChevronRight className="h-3 w-3" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button size="icon" variant="ghost" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); moveStage(1); }}>
+                      <ChevronRight className="h-3 w-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>İleri Taşı</TooltipContent>
+                </Tooltip>
               )}
               {isCreator && (
-                <Button size="icon" variant="ghost" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-destructive" onClick={(e) => { e.stopPropagation(); deleteReq.mutate(request.id); }}>
-                  <Trash2 className="h-3 w-3" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button size="icon" variant="ghost" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-destructive" onClick={(e) => { e.stopPropagation(); deleteReq.mutate(request.id); }}>
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Sil</TooltipContent>
+                </Tooltip>
               )}
             </div>
           </div>

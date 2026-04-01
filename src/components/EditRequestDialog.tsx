@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Request, useUpdateRequest } from "@/hooks/useRequests";
+import { Request, useUpdateRequest, useProfiles } from "@/hooks/useRequests";
 import { CATEGORIES, getCategoryConfig } from "@/lib/categories";
 
 const priorityLabels: Record<number, string> = {
@@ -28,7 +28,9 @@ export const EditRequestDialog = ({ request, open, onOpenChange }: Props) => {
   const [description, setDescription] = useState(request.description ?? "");
   const [category, setCategory] = useState(request.category ?? "");
   const [priority, setPriority] = useState(request.priority);
+  const [assignedTo, setAssignedTo] = useState(request.assigned_to ?? "");
   const updateReq = useUpdateRequest();
+  const { data: profiles } = useProfiles();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +42,7 @@ export const EditRequestDialog = ({ request, open, onOpenChange }: Props) => {
         description: description.trim() || null,
         category: category || null,
         priority,
+        assigned_to: assignedTo || null,
       },
       { onSuccess: () => onOpenChange(false) }
     );
@@ -79,6 +82,21 @@ export const EditRequestDialog = ({ request, open, onOpenChange }: Props) => {
                     </SelectItem>
                   );
                 })}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Atanan Kişi</Label>
+            <Select value={assignedTo} onValueChange={setAssignedTo}>
+              <SelectTrigger>
+                <SelectValue placeholder="Kişi seçin" />
+              </SelectTrigger>
+              <SelectContent>
+                {profiles?.map((p) => (
+                  <SelectItem key={p.user_id} value={p.user_id}>
+                    {p.full_name ?? p.user_id}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
