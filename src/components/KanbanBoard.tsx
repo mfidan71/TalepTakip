@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useRequests, useUpdateRequest } from "@/hooks/useRequests";
+import { useRequests, useUpdateRequest, useCreateRequest } from "@/hooks/useRequests";
 import { useStages, useCreateStage, useDeleteStage, useReorderStages } from "@/hooks/useStages";
 import { useActiveBoard } from "@/contexts/BoardContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { RequestCard } from "@/components/RequestCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
