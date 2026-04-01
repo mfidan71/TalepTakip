@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useRequests, useUpdateRequest } from "@/hooks/useRequests";
+import { useRequests, useUpdateRequest, useCreateRequest } from "@/hooks/useRequests";
 import { useStages, useCreateStage, useDeleteStage, useReorderStages } from "@/hooks/useStages";
 import { useActiveBoard } from "@/contexts/BoardContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { RequestCard } from "@/components/RequestCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,58 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { Plus, Minus } from "lucide-react";
+
+const QuickAddCard = ({ stageKey }: { stageKey: string }) => {
+  const [adding, setAdding] = useState(false);
+  const [title, setTitle] = useState("");
+  const createReq = useCreateRequest();
+  const { user } = useAuth();
+  const { activeBoardId } = useActiveBoard();
+
+  const handleAdd = () => {
+    if (!title.trim() || !user) return;
+    createReq.mutate(
+      { title: title.trim(), created_by: user.id, board_id: activeBoardId ?? undefined, stage: stageKey, priority: 3 },
+      { onSuccess: () => { setTitle(""); setAdding(false); } }
+    );
+  };
+
+  if (!adding) {
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        className="w-full gap-1 text-muted-foreground border border-dashed border-border mt-2"
+        onClick={() => setAdding(true)}
+      >
+        <Plus className="h-3.5 w-3.5" /> Talep Ekle
+      </Button>
+    );
+  }
+
+  return (
+    <div className="mt-2 space-y-2">
+      <Input
+        autoFocus
+        placeholder="Talep başlığı..."
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") handleAdd();
+          if (e.key === "Escape") { setAdding(false); setTitle(""); }
+        }}
+      />
+      <div className="flex gap-1">
+        <Button size="sm" className="flex-1" onClick={handleAdd} disabled={createReq.isPending}>
+          Ekle
+        </Button>
+        <Button size="sm" variant="ghost" onClick={() => { setAdding(false); setTitle(""); }}>
+          İptal
+        </Button>
+      </div>
+    </div>
+  );
+};
 
 export const KanbanBoard = () => {
   const { activeBoardId } = useActiveBoard();
@@ -159,6 +212,7 @@ export const KanbanBoard = () => {
                                   </div>
                                 )}
                               </div>
+                              <QuickAddCard stageKey={stage.key} />
                             </div>
                           )}
                         </Droppable>
