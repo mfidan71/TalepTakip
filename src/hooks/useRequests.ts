@@ -41,7 +41,7 @@ export const useProfiles = () => {
 export const useCreateRequest = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (req: { title: string; description?: string; category?: string; priority: number; created_by: string; board_id?: string; stage?: string }) => {
+    mutationFn: async (req: { title: string; description?: string; category?: string; priority: number; created_by: string; board_id?: string; stage?: string; assigned_to?: string }) => {
       const { data, error } = await supabase.from("requests").insert(req).select().single();
       if (error) throw error;
       return data;
