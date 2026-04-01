@@ -35,6 +35,7 @@ export const CreateRequestDialog = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !title.trim()) return;
+    const firstStageKey = stages?.[0]?.key ?? "talep";
     createReq.mutate(
       {
         title: title.trim(),
@@ -43,6 +44,7 @@ export const CreateRequestDialog = () => {
         priority,
         created_by: user.id,
         board_id: activeBoardId ?? undefined,
+        stage: firstStageKey,
       },
       {
         onSuccess: () => {
