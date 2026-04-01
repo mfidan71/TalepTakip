@@ -1,0 +1,1 @@
+ALTER TABLE public.requests DROP CONSTRAINT IF EXISTS requests_stage_check;
