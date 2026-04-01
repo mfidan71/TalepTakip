@@ -22,7 +22,7 @@ const QuickAddCard = ({ stageKey }: { stageKey: string }) => {
   const handleAdd = () => {
     if (!title.trim() || !user) return;
     createReq.mutate(
-      { title: title.trim(), created_by: user.id, board_id: activeBoardId ?? undefined, stage: stageKey },
+      { title: title.trim(), created_by: user.id, board_id: activeBoardId ?? undefined, stage: stageKey, priority: 3 },
       { onSuccess: () => { setTitle(""); setAdding(false); } }
     );
   };
