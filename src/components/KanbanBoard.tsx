@@ -212,6 +212,7 @@ export const KanbanBoard = () => {
                                   </div>
                                 )}
                               </div>
+                              <QuickAddCard stageKey={stage.key} />
                             </div>
                           )}
                         </Droppable>
