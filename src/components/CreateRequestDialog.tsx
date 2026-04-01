@@ -30,6 +30,7 @@ export const CreateRequestDialog = () => {
   const createReq = useCreateRequest();
   const { user } = useAuth();
   const { activeBoardId } = useActiveBoard();
+  const { data: stages } = useStages(activeBoardId);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
