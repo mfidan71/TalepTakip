@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { useCreateRequest } from "@/hooks/useRequests";
+import { useStages } from "@/hooks/useStages";
 import { useAuth } from "@/contexts/AuthContext";
 import { useActiveBoard } from "@/contexts/BoardContext";
 import { CATEGORIES, getCategoryConfig } from "@/lib/categories";
@@ -29,10 +30,12 @@ export const CreateRequestDialog = () => {
   const createReq = useCreateRequest();
   const { user } = useAuth();
   const { activeBoardId } = useActiveBoard();
+  const { data: stages } = useStages(activeBoardId);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !title.trim()) return;
+    const firstStageKey = stages?.[0]?.key ?? "talep";
     createReq.mutate(
       {
         title: title.trim(),
@@ -41,6 +44,7 @@ export const CreateRequestDialog = () => {
         priority,
         created_by: user.id,
         board_id: activeBoardId ?? undefined,
+        stage: firstStageKey,
       },
       {
         onSuccess: () => {
