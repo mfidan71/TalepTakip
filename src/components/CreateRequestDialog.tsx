@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { useCreateRequest } from "@/hooks/useRequests";
+import { useStages } from "@/hooks/useStages";
 import { useAuth } from "@/contexts/AuthContext";
 import { useActiveBoard } from "@/contexts/BoardContext";
 import { CATEGORIES, getCategoryConfig } from "@/lib/categories";
