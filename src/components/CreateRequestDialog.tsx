@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { useCreateRequest } from "@/hooks/useRequests";
+import { useCreateRequest, useProfiles } from "@/hooks/useRequests";
 import { useStages } from "@/hooks/useStages";
 import { useAuth } from "@/contexts/AuthContext";
 import { useActiveBoard } from "@/contexts/BoardContext";
@@ -21,21 +21,43 @@ const priorityLabels: Record<number, string> = {
   5: "Kritik",
 };
 
-export const CreateRequestDialog = () => {
-  const [open, setOpen] = useState(false);
+interface Props {
+  defaultStage?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export const CreateRequestDialog = ({ defaultStage, open: controlledOpen, onOpenChange: controlledOnOpenChange }: Props) => {
+  const isControlled = controlledOpen !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = isControlled ? (controlledOnOpenChange ?? (() => {})) : setInternalOpen;
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [priority, setPriority] = useState(3);
+  const [assignedTo, setAssignedTo] = useState("");
   const createReq = useCreateRequest();
   const { user } = useAuth();
   const { activeBoardId } = useActiveBoard();
   const { data: stages } = useStages(activeBoardId);
+  const { data: profiles } = useProfiles();
+
+  useEffect(() => {
+    if (open) {
+      setTitle("");
+      setDescription("");
+      setCategory("");
+      setPriority(3);
+      setAssignedTo("");
+    }
+  }, [open]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !title.trim()) return;
-    const firstStageKey = stages?.[0]?.key ?? "talep";
+    const stageKey = defaultStage ?? stages?.[0]?.key ?? "talep";
     createReq.mutate(
       {
         title: title.trim(),
@@ -44,28 +66,29 @@ export const CreateRequestDialog = () => {
         priority,
         created_by: user.id,
         board_id: activeBoardId ?? undefined,
-        stage: firstStageKey,
+        stage: stageKey,
+        assigned_to: assignedTo || undefined,
       },
       {
         onSuccess: () => {
           setOpen(false);
-          setTitle("");
-          setDescription("");
-          setCategory("");
-          setPriority(3);
         },
       }
     );
   };
 
+  const trigger = !isControlled ? (
+    <DialogTrigger asChild>
+      <Button className="gap-2">
+        <Plus className="h-4 w-4" />
+        Yeni Talep
+      </Button>
+    </DialogTrigger>
+  ) : null;
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          Yeni Talep
-        </Button>
-      </DialogTrigger>
+      {trigger}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="font-display">Yeni Talep Oluştur</DialogTitle>
@@ -112,6 +135,21 @@ export const CreateRequestDialog = () => {
                     </SelectItem>
                   );
                 })}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Atanan Kişi</Label>
+            <Select value={assignedTo} onValueChange={setAssignedTo}>
+              <SelectTrigger>
+                <SelectValue placeholder="Kişi seçin" />
+              </SelectTrigger>
+              <SelectContent>
+                {profiles?.map((p) => (
+                  <SelectItem key={p.user_id} value={p.user_id}>
+                    {p.full_name ?? p.user_id}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
