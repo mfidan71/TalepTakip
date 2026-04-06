@@ -80,6 +80,9 @@ export const RequestCard = ({ request }: { request: Request }) => {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Avatar className="h-5 w-5 text-[8px] shrink-0">
+                  {creatorProfile?.avatar_url ? (
+                    <AvatarImage src={creatorProfile.avatar_url} alt={creatorProfile.full_name ?? ""} />
+                  ) : null}
                   <AvatarFallback className="bg-muted text-muted-foreground">
                     {getInitials(creatorProfile?.full_name)}
                   </AvatarFallback>
@@ -93,6 +96,9 @@ export const RequestCard = ({ request }: { request: Request }) => {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Avatar className="h-5 w-5 text-[8px] shrink-0 ring-2 ring-primary/30">
+                      {assignedProfile?.avatar_url ? (
+                        <AvatarImage src={assignedProfile.avatar_url} alt={assignedProfile.full_name ?? ""} />
+                      ) : null}
                       <AvatarFallback className="bg-primary/10 text-primary text-[8px]">
                         {getInitials(assignedProfile.full_name)}
                       </AvatarFallback>
