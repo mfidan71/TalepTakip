@@ -14,7 +14,6 @@ import {
   ChevronRight,
   ChevronLeft,
   Trash2,
-  User,
   Pencil,
   ArrowDown,
   ArrowDownRight,
