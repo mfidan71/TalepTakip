@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Request, useUpdateRequest, useDeleteRequest, useProfiles } from "@/hooks/useRequests";
 import { useStages } from "@/hooks/useStages";
 import { useActiveBoard } from "@/contexts/BoardContext";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useRequestVotes, useToggleVote, useVoteHelpers } from "@/hooks/useVotes";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +14,6 @@ import {
   ChevronRight,
   ChevronLeft,
   Trash2,
-  User,
   Pencil,
   ArrowDown,
   ArrowDownRight,
@@ -52,8 +52,14 @@ export const RequestCard = ({ request }: { request: Request }) => {
   const isCreator = user?.id === request.created_by;
 
   const creatorProfile = profiles?.find((p) => p.user_id === request.created_by);
+  const assignedProfile = profiles?.find((p) => p.user_id === request.assigned_to);
   const prio = priorityConfig[request.priority] ?? priorityConfig[3];
   const PrioIcon = prio.icon;
+
+  const getInitials = (name: string | null) => {
+    if (!name) return "?";
+    return name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+  };
 
   const moveStage = (dir: 1 | -1) => {
     const newStage = stages?.[stageIndex + dir]?.key;
@@ -71,12 +77,33 @@ export const RequestCard = ({ request }: { request: Request }) => {
         <CardContent className="p-3 space-y-2">
           {/* Top: user avatar + name + priority icon */}
           <div className="flex items-center gap-2">
-            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-muted shrink-0">
-              <User className="h-3 w-3 text-muted-foreground" />
-            </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Avatar className="h-5 w-5 text-[8px] shrink-0">
+                  <AvatarFallback className="bg-muted text-muted-foreground">
+                    {getInitials(creatorProfile?.full_name)}
+                  </AvatarFallback>
+                </Avatar>
+              </TooltipTrigger>
+              <TooltipContent>{creatorProfile?.full_name ?? "Bilinmiyor"}</TooltipContent>
+            </Tooltip>
             <span className="text-[10px] text-muted-foreground truncate">{creatorProfile?.full_name ?? "?"}</span>
-            <div className={`ml-auto shrink-0 flex items-center gap-0.5 ${prio.className}`} title={prio.label}>
-              <PrioIcon className="h-3.5 w-3.5" strokeWidth={2.5} />
+            <div className="ml-auto shrink-0 flex items-center gap-1">
+              {assignedProfile && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Avatar className="h-5 w-5 text-[8px] shrink-0 ring-2 ring-primary/30">
+                      <AvatarFallback className="bg-primary/10 text-primary text-[8px]">
+                        {getInitials(assignedProfile.full_name)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </TooltipTrigger>
+                  <TooltipContent>Atanan: {assignedProfile.full_name}</TooltipContent>
+                </Tooltip>
+              )}
+              <div className={`flex items-center gap-0.5 ${prio.className}`} title={prio.label}>
+                <PrioIcon className="h-3.5 w-3.5" strokeWidth={2.5} />
+              </div>
             </div>
           </div>
 
