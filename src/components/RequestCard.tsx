@@ -53,8 +53,14 @@ export const RequestCard = ({ request }: { request: Request }) => {
   const isCreator = user?.id === request.created_by;
 
   const creatorProfile = profiles?.find((p) => p.user_id === request.created_by);
+  const assignedProfile = profiles?.find((p) => p.user_id === request.assigned_to);
   const prio = priorityConfig[request.priority] ?? priorityConfig[3];
   const PrioIcon = prio.icon;
+
+  const getInitials = (name: string | null) => {
+    if (!name) return "?";
+    return name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+  };
 
   const moveStage = (dir: 1 | -1) => {
     const newStage = stages?.[stageIndex + dir]?.key;
