@@ -1,8 +1,12 @@
 import { CreateRequestDialog } from "@/components/CreateRequestDialog";
 import { StageManagerDialog } from "@/components/StageManagerDialog";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProfiles } from "@/hooks/useRequests";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ClipboardList, LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export const AppHeader = () => {
   const { user, signOut } = useAuth();
