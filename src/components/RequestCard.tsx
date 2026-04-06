@@ -78,12 +78,33 @@ export const RequestCard = ({ request }: { request: Request }) => {
         <CardContent className="p-3 space-y-2">
           {/* Top: user avatar + name + priority icon */}
           <div className="flex items-center gap-2">
-            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-muted shrink-0">
-              <User className="h-3 w-3 text-muted-foreground" />
-            </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Avatar className="h-5 w-5 text-[8px] shrink-0">
+                  <AvatarFallback className="bg-muted text-muted-foreground">
+                    {getInitials(creatorProfile?.full_name)}
+                  </AvatarFallback>
+                </Avatar>
+              </TooltipTrigger>
+              <TooltipContent>{creatorProfile?.full_name ?? "Bilinmiyor"}</TooltipContent>
+            </Tooltip>
             <span className="text-[10px] text-muted-foreground truncate">{creatorProfile?.full_name ?? "?"}</span>
-            <div className={`ml-auto shrink-0 flex items-center gap-0.5 ${prio.className}`} title={prio.label}>
-              <PrioIcon className="h-3.5 w-3.5" strokeWidth={2.5} />
+            <div className="ml-auto shrink-0 flex items-center gap-1">
+              {assignedProfile && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Avatar className="h-5 w-5 text-[8px] shrink-0 ring-2 ring-primary/30">
+                      <AvatarFallback className="bg-primary/10 text-primary text-[8px]">
+                        {getInitials(assignedProfile.full_name)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </TooltipTrigger>
+                  <TooltipContent>Atanan: {assignedProfile.full_name}</TooltipContent>
+                </Tooltip>
+              )}
+              <div className={`flex items-center gap-0.5 ${prio.className}`} title={prio.label}>
+                <PrioIcon className="h-3.5 w-3.5" strokeWidth={2.5} />
+              </div>
             </div>
           </div>
 
