@@ -40,6 +40,11 @@ autoscaling:
   maxReplicas: 5
   targetCPUUtilizationPercentage: 80
 
+supabase:
+  url: ""
+  publishableKey: ""
+  projectId: ""
+
 nodeSelector: {}
 tolerations: []
 affinity: {}
