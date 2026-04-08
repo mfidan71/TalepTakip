@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "talep-yonetimi.fullname" . }}-config
+  labels:
+    {{- include "talep-yonetimi.labels" . | nindent 4 }}
+data:
+  VITE_SUPABASE_URL: {{ .Values.supabase.url | quote }}
+  VITE_SUPABASE_PUBLISHABLE_KEY: {{ .Values.supabase.publishableKey | quote }}
+  VITE_SUPABASE_PROJECT_ID: {{ .Values.supabase.projectId | quote }}
