@@ -13,14 +13,18 @@ export const StageManagerDialog = () => {
   const createStage = useCreateStage();
   const deleteStage = useDeleteStage();
   const [label, setLabel] = useState("");
-  const [key, setKey] = useState("");
+
+  const generateKey = (l: string) =>
+    l.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
 
   const handleAdd = () => {
-    if (!label.trim() || !key.trim()) return;
+    if (!label.trim()) return;
+    const key = generateKey(label);
+    if (!key) return;
     const nextOrder = (stages?.length ?? 0);
     createStage.mutate(
-      { key: key.trim().toLowerCase(), label: label.trim(), sort_order: nextOrder, board_id: activeBoardId ?? undefined },
-      { onSuccess: () => { setLabel(""); setKey(""); } }
+      { key, label: label.trim(), sort_order: nextOrder, board_id: activeBoardId ?? undefined },
+      { onSuccess: () => { setLabel(""); } }
     );
   };
 
@@ -62,18 +66,12 @@ export const StageManagerDialog = () => {
 
           <div className="border-t border-border pt-4 space-y-3">
             <Label className="text-sm font-semibold">Yeni Aşama Ekle</Label>
-            <div className="grid grid-cols-2 gap-2">
-              <Input
-                placeholder="Anahtar (ör: review)"
-                value={key}
-                onChange={(e) => setKey(e.target.value)}
-              />
-              <Input
-                placeholder="Etiket (ör: İnceleme)"
-                value={label}
-                onChange={(e) => setLabel(e.target.value)}
-              />
-            </div>
+            <Input
+              placeholder="Aşama adı (ör: İnceleme)"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+            />
             <Button onClick={handleAdd} className="w-full gap-2" disabled={createStage.isPending}>
               <Plus className="h-4 w-4" />
               Aşama Ekle

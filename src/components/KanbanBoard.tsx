@@ -21,16 +21,20 @@ export const KanbanBoard = () => {
   const createStage = useCreateStage();
   const deleteStage = useDeleteStage();
   const reorderStages = useReorderStages();
-  const [newKey, setNewKey] = useState("");
   const [newLabel, setNewLabel] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [createForStage, setCreateForStage] = useState<string | null>(null);
 
+  const generateKey = (label: string) =>
+    label.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+
   const handleAddStage = () => {
-    if (!newKey.trim() || !newLabel.trim()) return;
+    if (!newLabel.trim()) return;
+    const key = generateKey(newLabel);
+    if (!key) return;
     createStage.mutate(
-      { key: newKey.trim().toLowerCase(), label: newLabel.trim(), sort_order: stages?.length ?? 0, board_id: activeBoardId ?? undefined },
-      { onSuccess: () => { setNewKey(""); setNewLabel(""); setAddOpen(false); } }
+      { key, label: newLabel.trim(), sort_order: stages?.length ?? 0, board_id: activeBoardId ?? undefined },
+      { onSuccess: () => { setNewLabel(""); setAddOpen(false); } }
     );
   };
 
@@ -194,8 +198,7 @@ export const KanbanBoard = () => {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-64 space-y-3">
-                      <Input placeholder="Anahtar (ör: review)" value={newKey} onChange={(e) => setNewKey(e.target.value)} />
-                      <Input placeholder="Etiket (ör: İnceleme)" value={newLabel} onChange={(e) => setNewLabel(e.target.value)} />
+                      <Input placeholder="Aşama adı (ör: İnceleme)" value={newLabel} onChange={(e) => setNewLabel(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleAddStage()} />
                       <Button onClick={handleAddStage} className="w-full gap-1" size="sm" disabled={createStage.isPending}>
                         <Plus className="h-3.5 w-3.5" /> Ekle
                       </Button>
