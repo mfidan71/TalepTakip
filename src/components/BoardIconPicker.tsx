@@ -17,7 +17,7 @@ function getLazyIcon(name: string) {
   return iconCache[name];
 }
 
-export const DynamicBoardIcon = ({ name, ...props }: { name: string } & LucideProps) => {
+export const DynamicBoardIcon = ({ name, ...props }: { name: string } & Omit<LucideProps, 'ref'>) => {
   const Icon = getLazyIcon(name);
   if (!Icon) return <span className={props.className}>?</span>;
   return (
