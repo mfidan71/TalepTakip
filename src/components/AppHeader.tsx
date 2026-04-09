@@ -5,7 +5,7 @@ import { useProfiles } from "@/hooks/useRequests";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { ClipboardList, LogOut } from "lucide-react";
+import { ArrowLeft, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export const AppHeader = () => {
@@ -22,10 +22,10 @@ export const AppHeader = () => {
   return (
     <header className="border-b border-border bg-card px-4 py-3">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary">
-            <ClipboardList className="h-5 w-5 text-primary-foreground" />
-          </div>
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/")}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
           <div>
             <h1 className="font-display text-lg font-bold text-foreground leading-tight">Talep Yönetimi</h1>
             <p className="text-xs text-muted-foreground">Toplama · Puanlama · Geliştirme Süreci</p>
