@@ -28,7 +28,7 @@ export const useBoards = () => {
 export const useCreateBoard = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (board: { name: string; description?: string; created_by: string }) => {
+    mutationFn: async (board: { name: string; description?: string; created_by: string; icon?: string }) => {
       const { data, error } = await supabase.from("boards").insert(board).select().single();
       if (error) throw error;
       return data as Board;
@@ -51,6 +51,20 @@ export const useDeleteBoard = () => {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["boards"] });
       toast.success("Pano silindi");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+};
+
+export const useUpdateBoard = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: { id: string; name?: string; description?: string; icon?: string }) => {
+      const { error } = await supabase.from("boards").update(updates).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["boards"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
