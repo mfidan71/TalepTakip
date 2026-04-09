@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBoards, useCreateBoard, useDeleteBoard, useUpdateBoard } from "@/hooks/useBoards";
+import { useBoardStats } from "@/hooks/useBoardStats";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfiles } from "@/hooks/useRequests";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Trash2, LogOut, ClipboardList } from "lucide-react";
+import { Plus, Trash2, LogOut, ClipboardList, FileText, Clock } from "lucide-react";
 import { BoardIconPicker, DynamicBoardIcon } from "@/components/BoardIconPicker";
 import type { BoardIconName } from "@/lib/boardIcons";
 
@@ -19,7 +20,8 @@ const BoardList = () => {
   const { user, signOut } = useAuth();
   const { data: profiles } = useProfiles();
   const { data: boards, isLoading } = useBoards();
-  const createBoard = useCreateBoard();
+  const { data: statsMap } = useBoardStats();
+  const { data: profiles } = useProfiles();
   const deleteBoard = useDeleteBoard();
   const updateBoard = useUpdateBoard();
 
@@ -51,8 +53,21 @@ const BoardList = () => {
     deleteBoard.mutate(id);
   };
 
-  const handleIconChange = (boardId: string, icon: BoardIconName) => {
-    updateBoard.mutate({ id: boardId, icon });
+  const formatRelativeDate = (dateStr: string) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "az önce";
+    if (mins < 60) return `${mins}dk önce`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}sa önce`;
+    const days = Math.floor(hours / 24);
+    if (days < 30) return `${days}g önce`;
+    return new Date(dateStr).toLocaleDateString("tr-TR");
+  };
+
+  const getInitials = (name: string | null) => {
+    if (!name) return "?";
+    return name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
   };
 
   return (
