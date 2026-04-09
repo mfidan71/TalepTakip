@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBoards, useCreateBoard, useDeleteBoard, useUpdateBoard } from "@/hooks/useBoards";
+import { useBoardStats } from "@/hooks/useBoardStats";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfiles } from "@/hooks/useRequests";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Trash2, LogOut, ClipboardList } from "lucide-react";
+import { Plus, Trash2, LogOut, ClipboardList, FileText, Clock } from "lucide-react";
 import { BoardIconPicker, DynamicBoardIcon } from "@/components/BoardIconPicker";
 import type { BoardIconName } from "@/lib/boardIcons";
 
@@ -19,6 +20,7 @@ const BoardList = () => {
   const { user, signOut } = useAuth();
   const { data: profiles } = useProfiles();
   const { data: boards, isLoading } = useBoards();
+  const { data: statsMap } = useBoardStats();
   const createBoard = useCreateBoard();
   const deleteBoard = useDeleteBoard();
   const updateBoard = useUpdateBoard();
@@ -28,6 +30,7 @@ const BoardList = () => {
   const [createOpen, setCreateOpen] = useState(false);
 
   const profile = profiles?.find((p) => p.user_id === user?.id);
+
   const getInitials = (name: string | null) => {
     if (!name) return "?";
     return name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
@@ -37,22 +40,23 @@ const BoardList = () => {
     if (!newName.trim() || !user) return;
     createBoard.mutate(
       { name: newName.trim(), created_by: user.id, icon: newIcon },
-      {
-        onSuccess: () => {
-          setNewName("");
-          setNewIcon("clipboard-list");
-          setCreateOpen(false);
-        },
-      }
+      { onSuccess: () => { setNewName(""); setNewIcon("clipboard-list"); setCreateOpen(false); } }
     );
   };
 
-  const handleDelete = (id: string) => {
-    deleteBoard.mutate(id);
-  };
+  const handleDelete = (id: string) => deleteBoard.mutate(id);
+  const handleIconChange = (boardId: string, icon: BoardIconName) => updateBoard.mutate({ id: boardId, icon });
 
-  const handleIconChange = (boardId: string, icon: BoardIconName) => {
-    updateBoard.mutate({ id: boardId, icon });
+  const formatRelativeDate = (dateStr: string) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "az önce";
+    if (mins < 60) return `${mins}dk önce`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}sa önce`;
+    const days = Math.floor(hours / 24);
+    if (days < 30) return `${days}g önce`;
+    return new Date(dateStr).toLocaleDateString("tr-TR");
   };
 
   return (
@@ -137,7 +141,7 @@ const BoardList = () => {
                   className="group relative cursor-pointer hover:shadow-lg hover:border-primary/40 transition-all duration-200"
                   onClick={() => navigate(`/board/${board.id}`)}
                 >
-                  <CardContent className="flex flex-col items-center justify-center p-6 pt-8 pb-6 min-h-[176px]">
+                  <CardContent className="flex flex-col items-center p-6 pt-8 pb-5 min-h-[220px]">
                     <div className="flex items-center justify-center h-16 w-16 rounded-2xl bg-primary/10 text-primary mb-4">
                       <DynamicBoardIcon name={(board as any).icon || "clipboard-list"} className="h-8 w-8" />
                     </div>
@@ -145,6 +149,47 @@ const BoardList = () => {
                     {board.description && (
                       <p className="text-xs text-muted-foreground text-center mt-1 line-clamp-2">{board.description}</p>
                     )}
+
+                    {/* Stats */}
+                    {(() => {
+                      const stats = statsMap?.get(board.id);
+                      const recentUsers = stats?.recent_user_ids
+                        .map((uid) => profiles?.find((p) => p.user_id === uid))
+                        .filter(Boolean) ?? [];
+                      return (
+                        <div className="mt-auto pt-4 w-full space-y-2">
+                          <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <FileText className="h-3 w-3" />
+                              {stats?.request_count ?? 0} talep
+                            </span>
+                            {stats?.last_updated && (
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {formatRelativeDate(stats.last_updated)}
+                              </span>
+                            )}
+                          </div>
+                          {recentUsers.length > 0 && (
+                            <div className="flex items-center justify-center -space-x-2">
+                              {recentUsers.slice(0, 5).map((p) => (
+                                <Tooltip key={p!.user_id}>
+                                  <TooltipTrigger asChild>
+                                    <Avatar className="h-6 w-6 text-[8px] border-2 border-card">
+                                      {p!.avatar_url ? <AvatarImage src={p!.avatar_url} /> : null}
+                                      <AvatarFallback className="bg-primary/10 text-primary">
+                                        {getInitials(p!.full_name)}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                  </TooltipTrigger>
+                                  <TooltipContent>{p!.full_name ?? "Kullanıcı"}</TooltipContent>
+                                </Tooltip>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </CardContent>
                   {user?.id === board.created_by && (
                     <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
@@ -159,21 +204,14 @@ const BoardList = () => {
                       />
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                            onClick={(e) => e.stopPropagation()}
-                          >
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={(e) => e.stopPropagation()}>
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent onClick={(e) => e.stopPropagation()}>
                           <AlertDialogHeader>
                             <AlertDialogTitle>Panoyu Sil</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              "{board.name}" panosunu silmek istediğinize emin misiniz?
-                            </AlertDialogDescription>
+                            <AlertDialogDescription>"{board.name}" panosunu silmek istediğinize emin misiniz?</AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>İptal</AlertDialogCancel>
