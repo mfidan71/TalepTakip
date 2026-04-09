@@ -7,8 +7,8 @@ type BoardContextType = {
 
 const BoardContext = createContext<BoardContextType>({ activeBoardId: null, setActiveBoardId: () => {} });
 
-export const BoardProvider = ({ children }: { children: ReactNode }) => {
-  const [activeBoardId, setActiveBoardId] = useState<string | null>(null);
+export const BoardProvider = ({ children, initialBoardId = null }: { children: ReactNode; initialBoardId?: string | null }) => {
+  const [activeBoardId, setActiveBoardId] = useState<string | null>(initialBoardId);
   return (
     <BoardContext.Provider value={{ activeBoardId, setActiveBoardId }}>
       {children}

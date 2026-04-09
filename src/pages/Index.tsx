@@ -1,6 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import Auth from "@/pages/Auth";
-import Dashboard from "@/pages/Dashboard";
+import BoardList from "@/pages/BoardList";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -14,7 +14,7 @@ const Index = () => {
   }
 
   if (!user) return <Auth />;
-  return <Dashboard />;
+  return <BoardList />;
 };
 
 export default Index;

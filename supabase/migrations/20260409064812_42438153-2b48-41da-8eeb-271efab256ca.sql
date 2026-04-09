@@ -1,0 +1,1 @@
+ALTER TABLE public.boards ADD COLUMN icon TEXT NOT NULL DEFAULT 'clipboard-list';
