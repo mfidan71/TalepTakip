@@ -21,7 +21,7 @@ const BoardList = () => {
   const { data: profiles } = useProfiles();
   const { data: boards, isLoading } = useBoards();
   const { data: statsMap } = useBoardStats();
-  const { data: profiles } = useProfiles();
+  const createBoard = useCreateBoard();
   const deleteBoard = useDeleteBoard();
   const updateBoard = useUpdateBoard();
 
@@ -30,6 +30,7 @@ const BoardList = () => {
   const [createOpen, setCreateOpen] = useState(false);
 
   const profile = profiles?.find((p) => p.user_id === user?.id);
+
   const getInitials = (name: string | null) => {
     if (!name) return "?";
     return name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
@@ -39,19 +40,12 @@ const BoardList = () => {
     if (!newName.trim() || !user) return;
     createBoard.mutate(
       { name: newName.trim(), created_by: user.id, icon: newIcon },
-      {
-        onSuccess: () => {
-          setNewName("");
-          setNewIcon("clipboard-list");
-          setCreateOpen(false);
-        },
-      }
+      { onSuccess: () => { setNewName(""); setNewIcon("clipboard-list"); setCreateOpen(false); } }
     );
   };
 
-  const handleDelete = (id: string) => {
-    deleteBoard.mutate(id);
-  };
+  const handleDelete = (id: string) => deleteBoard.mutate(id);
+  const handleIconChange = (boardId: string, icon: BoardIconName) => updateBoard.mutate({ id: boardId, icon });
 
   const formatRelativeDate = (dateStr: string) => {
     const diff = Date.now() - new Date(dateStr).getTime();
@@ -63,11 +57,6 @@ const BoardList = () => {
     const days = Math.floor(hours / 24);
     if (days < 30) return `${days}g önce`;
     return new Date(dateStr).toLocaleDateString("tr-TR");
-  };
-
-  const getInitials = (name: string | null) => {
-    if (!name) return "?";
-    return name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
   };
 
   return (
