@@ -63,7 +63,7 @@ export const RequestDetailDialog = ({ request, open, onOpenChange }: Props) => {
   const handleSubmitComment = () => {
     if (!commentText.trim() || !user) return;
     createComment.mutate(
-      { request_id: request.id, user_id: user.id, content: commentText },
+      { request_id: request.id, user_id: user.id, content: commentText, board_id: request.board_id, request_title: request.title },
       { onSuccess: () => setCommentText("") }
     );
   };
