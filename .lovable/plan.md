@@ -1,23 +1,32 @@
 
 
-## Profil Ekranı ve Profil Fotoğrafı Yükleme
+## Webhook Planına Yorum Olayı Ekleme
 
-### Yapılacaklar
+Mevcut webhook planına `comment.created` olayını ekleyeceğiz. Yorum yapıldığında da webhook tetiklenecek.
 
-1. **Storage bucket oluştur** -- `avatars` adında public bir storage bucket ve RLS politikaları oluşturacak bir migration yazılacak. Kullanıcılar kendi klasörlerine dosya yükleyip okuyabilecek.
+### Değişiklikler
 
-2. **Profil sayfası oluştur** (`src/pages/Profile.tsx`) -- Kullanıcının adını düzenleyebileceği bir input, profil fotoğrafı yükleyebileceği bir dosya seçici (file input + önizleme), ve kaydet butonu içeren basit bir sayfa. `supabase.storage.from('avatars').upload()` ile dosya yüklenecek, public URL alınıp `profiles` tablosundaki `avatar_url` güncellenecek.
+1. **Webhooks tablosu** -- `events` dizisine `comment.created` olayı da eklenecek. Desteklenen olaylar: `request.created`, `request.updated`, `request.deleted`, `request.stage_changed`, `comment.created`
 
-3. **Route ekle** (`src/App.tsx`) -- `/profile` rotası eklenecek.
+2. **Edge Function (`webhook-dispatch`)** -- `comment.created` olayını da destekleyecek. Payload formatı:
+```json
+{
+  "event": "comment.created",
+  "timestamp": "...",
+  "board_id": "...",
+  "data": {
+    "comment_id": "...",
+    "request_id": "...",
+    "request_title": "...",
+    "user_id": "...",
+    "content": "..."
+  }
+}
+```
 
-4. **Header'a profil linki ekle** (`src/components/AppHeader.tsx`) -- Kullanıcının avatarını gösteren tıklanabilir bir avatar butonu eklenecek, tıklayınca `/profile` sayfasına yönlendirecek. Mevcut e-posta metni yerine avatar + isim gösterilecek.
+3. **`useCreateComment` hook'u** (`src/hooks/useComments.ts`) -- `onSuccess` callback'inde edge function çağrısı eklenecek. Yorumun ait olduğu request'in `board_id`'si üzerinden ilgili webhook'lar tetiklenecek.
 
-5. **Avatar gösterimlerini güncelle** (`src/components/RequestCard.tsx` vb.) -- `avatar_url` varsa `AvatarImage` ile gerçek fotoğrafı göster.
+4. **Webhook yönetim UI** -- Olay seçim checkbox'larına "Yorum eklendi" seçeneği eklenecek.
 
-### Teknik Detaylar
-
-- Storage bucket migration: `INSERT INTO storage.buckets (id, name, public) VALUES ('avatars', 'avatars', true)` + RLS policies for authenticated users
-- Dosya yolu: `{user_id}/{timestamp}.{ext}` formatında
-- Profil güncelleme: `supabase.from('profiles').update({ full_name, avatar_url }).eq('user_id', userId)`
-- `useProfiles` hook'u zaten mevcut, profil sayfasında da kullanılacak
+Bu değişiklik, daha önce onaylanan webhook planının bir parçası olarak uygulanacak.
 
