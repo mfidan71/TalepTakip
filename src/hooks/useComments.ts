@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { dispatchWebhook } from "@/hooks/useWebhooks";
 
 export const useComments = (requestId: string) => {
   return useQuery({
@@ -20,17 +21,26 @@ export const useComments = (requestId: string) => {
 export const useCreateComment = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ request_id, user_id, content }: { request_id: string; user_id: string; content: string }) => {
+    mutationFn: async ({ request_id, user_id, content, board_id, request_title }: { request_id: string; user_id: string; content: string; board_id?: string | null; request_title?: string }) => {
       const { data, error } = await supabase
         .from("request_comments")
         .insert({ request_id, user_id, content: content.trim() })
         .select()
         .single();
       if (error) throw error;
-      return data;
+      return { ...data, board_id, request_title };
     },
-    onSuccess: (_data, vars) => {
+    onSuccess: (data, vars) => {
       qc.invalidateQueries({ queryKey: ["request_comments", vars.request_id] });
+      if (data.board_id) {
+        dispatchWebhook("comment.created", data.board_id, {
+          comment_id: data.id,
+          request_id: data.request_id,
+          request_title: data.request_title ?? "",
+          user_id: data.user_id,
+          content: data.content,
+        });
+      }
     },
     onError: (e: Error) => toast.error(e.message),
   });
