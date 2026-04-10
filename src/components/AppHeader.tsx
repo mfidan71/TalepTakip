@@ -1,17 +1,22 @@
+import { useState } from "react";
 import { CreateRequestDialog } from "@/components/CreateRequestDialog";
 import { StageManagerDialog } from "@/components/StageManagerDialog";
+import WebhookManagerDialog from "@/components/WebhookManagerDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfiles } from "@/hooks/useRequests";
+import { useActiveBoard } from "@/contexts/BoardContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { ArrowLeft, LogOut } from "lucide-react";
+import { ArrowLeft, LogOut, Globe } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export const AppHeader = () => {
   const { user, signOut } = useAuth();
   const { data: profiles } = useProfiles();
+  const { activeBoardId } = useActiveBoard();
   const navigate = useNavigate();
+  const [webhookOpen, setWebhookOpen] = useState(false);
 
   const profile = profiles?.find((p) => p.user_id === user?.id);
   const getInitials = (name: string | null) => {
@@ -33,6 +38,19 @@ export const AppHeader = () => {
         </div>
         <div className="flex items-center gap-3">
           <StageManagerDialog />
+          {activeBoardId && (
+            <>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => setWebhookOpen(true)}>
+                    <Globe className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Webhook Yönetimi</TooltipContent>
+              </Tooltip>
+              <WebhookManagerDialog boardId={activeBoardId} open={webhookOpen} onOpenChange={setWebhookOpen} />
+            </>
+          )}
           <CreateRequestDialog />
           <div className="flex items-center gap-2">
             <Tooltip>

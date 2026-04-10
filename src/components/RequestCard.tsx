@@ -193,7 +193,7 @@ export const RequestCard = ({ request }: { request: Request }) => {
               {isCreator && (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button size="icon" variant="ghost" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-destructive" onClick={(e) => { e.stopPropagation(); deleteReq.mutate(request.id); }}>
+                    <Button size="icon" variant="ghost" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-destructive" onClick={(e) => { e.stopPropagation(); deleteReq.mutate({ id: request.id, board_id: request.board_id }); }}>
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   </TooltipTrigger>
